@@ -4,7 +4,8 @@
 output_file="/home/sigmoid/monitoring/output.csv"
 notification_file="/home/sigmoid/monitoring/notifications.txt"
 
-top -b -n 2 -d 10 | awk -v OFS=',' '{if (NR > 7 && $9 > 0) print $12, $9, strftime("%Y-%m-%d %H:%M:%S")} ' > "$output_file"
+# Run top command in batch mode, capture command, cpu percentage, memory, and timestamp for 10 seconds
+top -b -n 1 -d 10 | awk -v OFS=',' '{if (NR > 7 && $9 > 5) print $12, $9, strftime("%Y-%m-%d %H:%M:%S")} ' > "$output_file"
 
 # Analyze output and categorize commands into different colors, only for commands exceeding 5% or 10%
 awk -F, '!seen[$1]++ {
@@ -25,14 +26,19 @@ awk -F, '!seen[$1]++ {
         next
     }
     
-    printf "%-25s %-10s %s%-20s\033[0m\n", $1, $2, color, notification
+    printf "%-30s %-10s %s%-20s\033[0m\n", $1, $2, color, notification
 }' "$output_file" > "$notification_file"
 
+# Add the header to the notification file
+echo "command,Cpu %,notification" > temp_file
+cat "$notification_file" >> temp_file
+mv temp_file "$notification_file"
+
 # Print the header
-printf "%-25s %-10s %-20s\n" "command" "Cpu %" "notification"
+printf "%-30s %-10s %-20s\n" "command" "Cpu %" "notification"
 
 # Print and save the notification output
 cat "$notification_file"
 
-# No need to clean up temporary files as they are overwritten in each run
+
 
