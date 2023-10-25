@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# Output file (use an absolute path to ensure it's saved in a specific location)
+# Output file 
 output_file="/home/sigmoid/monitoring/output.csv"
 notification_file="/home/sigmoid/monitoring/notifications.txt"
 
-# Run top command in batch mode, capture command, cpu percentage, memory, and timestamp for 10 seconds
-top -b -n 2 -d 10 | awk -v OFS=',' '{if (NR > 7 && $9 > 0) print $12, $9, strftime("%Y-%m-%d %H:%M:%S")} ' >> "$output_file"
+top -b -n 2 -d 10 | awk -v OFS=',' '{if (NR > 7 && $9 > 0) print $12, $9, strftime("%Y-%m-%d %H:%M:%S")} ' > "$output_file"
 
 # Analyze output and categorize commands into different colors, only for commands exceeding 5% or 10%
 awk -F, '!seen[$1]++ {
